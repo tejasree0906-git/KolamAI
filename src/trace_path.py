@@ -5,6 +5,8 @@ import numpy as np
 import networkx as nx                                       # NEW 9
 from build_graph import build_graph, RES                   # NEW 1: reuse the graph code
 
+APART = 40                                                  # NEW 46: two strands must start at least 40 pixels apart
+
 
 def order_road(slab, k):                                   # NEW 2
     """Pixels of road k as an ordered list of (x, y), from one end to the other."""
@@ -152,8 +154,11 @@ def build_strands(G, roads):                               # NEW 18
         used = set()                                       # NEW 18
         while len(used) < len(piece_roads):                # NEW 18: one strand per round
             free = [(rid, e) for rid in piece_roads if rid not in used for e in (0, 1)]   # NEW 18
-            start = min(free, key=lambda re: (roads[re[0]][0][0 if re[1] == 0 else -1][1],
-                                              roads[re[0]][0][0 if re[1] == 0 else -1][0]))   # NEW 18: top-most free road end
+            xy = lambda re: roads[re[0]][0][0 if re[1] == 0 else -1]   # NEW 47: (x, y) of a road end
+            apart = [re for re in free
+                     if all(np.hypot(xy(re)[0] - s0[0][0], xy(re)[1] - s0[0][1]) > APART for s0 in strands)]   # NEW 48: ends far from every start so far
+            pool = apart if apart else free                # NEW 49: if nothing is far enough, use any free end
+            start = min(pool, key=lambda re: (xy(re)[1], xy(re)[0]))   # NEW 18: top-most end among the allowed ones
             rid, e = start                                 # NEW 18
             strand, count, max_turn, prev_dir, first_dir, closed = [], 0, 0.0, None, None, False   # NEW 18
             junction = None                                # NEW 18
@@ -255,8 +260,11 @@ if __name__ == "__main__":                                 # NEW 8: check EVERY 
         print("   STRAND TEST: strands", len(strands), "(pieces in the graph:", nx.number_connected_components(G), ")")   # NEW 20
         for i, (st, (n_roads, closed, turn, in_piece)) in enumerate(zip(strands, report)):   # NEW 20
             print("   strand", i + 1, "| points", len(st), "| roads", n_roads, "| closed loop", closed,
-                  "| sharpest turn at a crossing", round(turn, 1), "deg")   # NEW 20
+                  "| sharpest turn at a crossing", round(turn, 1), "deg", "| starts at", st[0])   # NEW 50: show where it starts
         print("   roads used in all strands", sum(r[0] for r in report), "of", G.number_of_edges())   # NEW 20
+        gaps = [float(np.hypot(a[0][0] - b[0][0], a[0][1] - b[0][1])) for i, a in enumerate(strands) for b in strands[i + 1:]]   # NEW 51: distance between every pair of starts
+        if gaps:                                           # NEW 51
+            print("   START GAP TEST: closest two starts are", round(min(gaps)), "px apart (need more than", APART, ")")   # NEW 51
 
         marks = [d["pos"] for n, d in G.nodes(data=True) if n.startswith("J")]   # NEW 21: crossing centres
         cv2.imwrite(os.path.join(RES, "path_" + name), draw_strokes(strands, slab.shape, marks))   # NEW 21: save the picture
