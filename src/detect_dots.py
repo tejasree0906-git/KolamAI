@@ -1,5 +1,6 @@
 import cv2, os
 import numpy as np                                 # NEW 2: for an empty black picture
+from skimage.morphology import skeletonize         # NEW 3: thins a line to 1 pixel
 
 def detect_dots(path):
     img = cv2.imread(path)
@@ -20,6 +21,7 @@ def detect_dots(path):
             count += 1
             dot_ids.append(i)
 
+    # PIECE 1: remove the dots, keep only the curve
     curve = bw.copy()
     for i in dot_ids:
         curve[labels == i] = 0
@@ -37,13 +39,18 @@ def detect_dots(path):
             kept += 1                                        # NEW 2
     print("   curve pieces kept:", kept, "dropped:", (n2 - 1) - kept)   # NEW 2
 
+    # NEW 3: thin the clean curve to a 1-pixel line
+    skel = skeletonize(clean > 0)                            # NEW 3: True/False picture in, thinned True/False picture out
+    skel_img = (skel * 255).astype(np.uint8)                 # NEW 3: back to 0/255 so we can save it
+    print("   curve pixels:", int((clean > 0).sum()), "-> skeleton pixels:", int(skel.sum()))   # NEW 3
+
     os.makedirs("results", exist_ok=True)
     name = os.path.basename(path)
     cv2.imwrite("results/" + name, img)
     cv2.imwrite("results/curve_" + name, curve)
     cv2.imwrite("results/clean_" + name, clean)              # NEW 2: save the cleaned picture
+    cv2.imwrite("results/skel_" + name, skel_img)            # NEW 3: save the skeleton
     return count
 
 for name in ["k01.png", "k02.png", "k03.png", "k04.png"]:
     print(name, "-> found", detect_dots("data/real/" + name), "expected 9")
-    
