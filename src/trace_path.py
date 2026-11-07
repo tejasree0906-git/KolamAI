@@ -197,7 +197,15 @@ def save_path_data(name, shape, strands, marks):           # NEW 23
         "crossings": [[int(round(x)), int(round(y))] for x, y in marks],       # NEW 23: crossing centres
         "strands": [[[int(x), int(y)] for x, y in st] for st in strands],      # NEW 23: each strand = list of points
     }
-    out = os.path.join(RES, "path_" + os.path.splitext(name)[0] + ".json")     # NEW 23: path_k01.json
+    stem = os.path.splitext(name)[0]                       # NEW 30: "k01"
+    dots_file = os.path.join(RES, "dots_" + stem + ".json")   # NEW 30: written by detect_dots.py
+    if os.path.exists(dots_file):                          # NEW 30
+        with open(dots_file) as f:                         # NEW 30
+            data["dots"] = json.load(f)                    # NEW 30: [x, y, radius] per dot
+    else:                                                  # NEW 30
+        data["dots"] = []                                  # NEW 30
+        print("   WARNING: no", dots_file, "- run python src/detect_dots.py first")   # NEW 30
+    out = os.path.join(RES, "path_" + stem + ".json")      # NEW 23: path_k01.json
     with open(out, "w") as f:                              # NEW 23
         json.dump(data, f)                                 # NEW 23: write the card
     return out                                             # NEW 23
@@ -258,5 +266,5 @@ if __name__ == "__main__":                                 # NEW 8: check EVERY 
             back = json.load(f)                            # NEW 25
         same = [len(x) for x in back["strands"]] == [len(x) for x in strands]   # NEW 25
         print("   DATA TEST: saved", os.path.basename(saved), "| strands", len(back["strands"]),
-              "| points", sum(len(x) for x in back["strands"]), "| crossings", len(back["crossings"]),
+              "| points", sum(len(x) for x in back["strands"]), "| crossings", len(back["crossings"]), "| dots", len(back["dots"]),
               "| same as in memory", same)                  # NEW 25

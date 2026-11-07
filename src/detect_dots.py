@@ -1,4 +1,4 @@
-import cv2, os
+import cv2, os, json                              # NEW 26: json writes the dots file
 import numpy as np                                 # NEW 2: for an empty black picture
 from skimage.morphology import skeletonize         # NEW 3: thins a line to 1 pixel
 
@@ -11,6 +11,7 @@ def detect_dots(path):
 
     count = 0
     dot_ids = []
+    dots = []                                              # NEW 27: centre and size of every dot
     for i in range(1, n):
         x, y, w, h, area = stats[i]
         roundness = area / (3.14159 * (max(w, h) / 2) ** 2)
@@ -20,6 +21,7 @@ def detect_dots(path):
             cv2.circle(img, (int(cx), int(cy)), r, (0, 0, 255), 3)
             count += 1
             dot_ids.append(i)
+            dots.append([int(round(cx)), int(round(cy)), r])        # NEW 28: remember this dot
 
     # PIECE 1: remove the dots, keep only the curve
     curve = bw.copy()
@@ -50,6 +52,8 @@ def detect_dots(path):
     cv2.imwrite("results/curve_" + name, curve)
     cv2.imwrite("results/clean_" + name, clean)              # NEW 2: save the cleaned picture
     cv2.imwrite("results/skel_" + name, skel_img)            # NEW 3: save the skeleton
+    with open("results/dots_" + os.path.splitext(name)[0] + ".json", "w") as f:   # NEW 29: dots file, e.g. results/dots_k01.json
+        json.dump(dots, f)                                   # NEW 29: list of [x, y, radius]
     return count
 
 for name in ["k01.png", "k02.png", "k03.png", "k04.png"]:
