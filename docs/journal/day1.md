@@ -2,8 +2,6 @@
 
 Project: Kolam AI | Course: Societal Based Mini Project (24AIM57) | Student: Tejasree E
 
-> Draft. Fill the one [bracket] left, then rewrite any line in your own words.
-
 ## 1. Goal of today
 
 - Set up the project and get a small dataset
@@ -20,13 +18,13 @@ Project: Kolam AI | Course: Societal Based Mini Project (24AIM57) | Student: Tej
 
 ## 3. How it works in plain words
 
-- The computer turns the picture grey, then blurs it a little so tiny specks vanish
-- It turns every pixel into black or white (Otsu picks the cut-off by itself)
-- The colours are flipped so the dots become white, because OpenCV only finds white shapes
-- It gives every white shape a number and records its size and centre
-- Every shape faces 3 questions: right size, square-ish, round? Any "no" and it is rejected
-- The long kolam curve fails the size test, so only the dots survive
-- A red circle is drawn on each dot and the dots are counted
+- First the computer makes the picture grey and blurs it little bit, so the tiny specks goes away
+- Then every pixel becomes black or white, Otsu decides the cut-off by itself, I dont have to pick
+- I flip the colours so the dots becomes white, because OpenCV can find only white shapes
+- Every white shape gets a number, and the computer notes its size and centre
+- Each shape has to pass 3 questions: is the size right, is it square-ish, is it round. If any one is "no", it is rejected
+- The long kolam curve is too big, so it fails the size test and only the dots are left
+- At last a red circle is drawn on every dot and the dots are counted
 
 ## 4. What broke and how I fixed it
 
@@ -46,5 +44,6 @@ Project: Kolam AI | Course: Societal Based Mini Project (24AIM57) | Student: Tej
 ## Checkpoints
 
 - Dots found on all 4 digital images: yes
-- Fake image correct: [confirm: 25 dots found on `fake_5x5.png`]
-- Gate (80% on real images): passed, so Plan A (OpenCV detection) stays and Plan B (fixed grid) is not needed
+- Fake image correct: yes, 25 dots found on `fake_5x5.png`
+- Gate (dot detection on real images): passed. 4 of 4 images, 9 of 9 dots each, so Plan A (OpenCV detection) stays and Plan B (fixed grid) is not needed
+- "10 random images match their labels": not done. I changed the plan and decided to test the whole pipeline on only 4 images first. The labeling CSV and more images will come after all stages work

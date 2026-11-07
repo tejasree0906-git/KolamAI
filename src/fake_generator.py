@@ -12,6 +12,6 @@ def make_dot_grid(n, spacing=100, margin=100, radius=10):
     return img
 
 if __name__ == "__main__":
-    img = make_dot_grid(7)
+    img = make_dot_grid(5)
     cv2.imwrite("data/fake_5x5.png", img)
-    print("saved. True dot count =", 7* 7)
+    print("saved. True dot count =", 5* 5)
