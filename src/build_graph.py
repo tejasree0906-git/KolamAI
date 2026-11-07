@@ -79,10 +79,17 @@ def build_graph(name):
     print("   junctions:", nj - 1, "endpoints:", n_end, "edges:", G.number_of_edges(),
           "pieces:", nx.number_connected_components(G))
     print("   degrees:", sorted(dict(G.degree()).values()))
-    return G
+    return G, slab, jlab                                       # NEW 1: also give back the road labels and junction labels
 
 
 if __name__ == "__main__":
     for name in ["k01.png", "k02.png", "k03.png", "k04.png"]:
         print(name)
-        build_graph(name)
+        result = build_graph(name)
+        if result is None:                                     # NEW 2
+            continue                                           # NEW 2
+        G, slab, jlab = result                                 # NEW 2
+        for n, (u, v, key, d) in enumerate(G.edges(keys=True, data=True)):   # NEW 3: first 3 roads only
+            if n == 3:                                         # NEW 3
+                break                                          # NEW 3
+            print("   edge", u, v, "key", key, "seg", d["seg"], "pixels", int((slab == d["seg"]).sum()))   # NEW 3
