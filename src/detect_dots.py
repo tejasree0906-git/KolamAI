@@ -8,6 +8,7 @@ def detect_dots(path):
     n, labels, stats, centroids = cv2.connectedComponentsWithStats(bw, connectivity=8)
 
     count = 0
+    dot_ids = []                                   # NEW: shape numbers that are dots
     for i in range(1, n):
         x, y, w, h, area = stats[i]
         roundness = area / (3.14159 * (max(w, h) / 2) ** 2)
@@ -16,9 +17,16 @@ def detect_dots(path):
             r = int(max(w, h) / 2) + 8
             cv2.circle(img, (int(cx), int(cy)), r, (0, 0, 255), 3)
             count += 1
+            dot_ids.append(i)                      # NEW: remember this dot
+
+    curve = bw.copy()                              # NEW: photocopy, erase on the copy
+    for i in dot_ids:                              # NEW
+        curve[labels == i] = 0                     # NEW: rub out every dot
 
     os.makedirs("results", exist_ok=True)
-    cv2.imwrite("results/" + os.path.basename(path), img)
+    name = os.path.basename(path)
+    cv2.imwrite("results/" + name, img)
+    cv2.imwrite("results/curve_" + name, curve)    # NEW: save the curve-only picture
     return count
 
 for name in ["k01.png", "k02.png", "k03.png", "k04.png"]:
