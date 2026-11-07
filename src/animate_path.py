@@ -17,13 +17,40 @@ def load_path_data(name):                                   # NEW 35
         return json.load(f)                                 # NEW 35
 
 
-def pick_label_spot(sx, sy, tw, th, all_pts, dots, w, h, enough=12):   # NEW 52
-    """Try 24 directions around a start ring, close first, then farther away.
-    Keep a spot where the label box is at least `enough` px from every line and dot. If none, use the best one found."""
+def pick_label_spot(sx, sy, tw, th, all_pts, dots, w, h, others, enough=10):   # NEW 60: `others` = boxes of other rings and labels already placed
+    """Put the label straight ABOVE the start ring, centred. If that spot is not free, try other directions, nearest to 'up' first.
+    Returns (gap, x, y, ha, va, box). gap = how far the label box is from the closest line, dot, ring or label."""
+
+    def clearance(x0, y0, x1, y1):                          # NEW 61: how far is this box from everything it must not touch?
+        dx = np.maximum(np.maximum(x0 - all_pts[:, 0], 0), all_pts[:, 0] - x1)   # NEW 53: distance from every line point to the box
+        dy = np.maximum(np.maximum(y0 - all_pts[:, 1], 0), all_pts[:, 1] - y1)   # NEW 53
+        gap = float(np.hypot(dx, dy).min())                 # NEW 53: closest line point
+        for (x, y, r) in dots:                              # NEW 53: dots count too (real size is r - 8)
+            ddx = max(x0 - x, 0, x - x1)                    # NEW 53
+            ddy = max(y0 - y, 0, y - y1)                    # NEW 53
+            gap = min(gap, float(np.hypot(ddx, ddy)) - (r - 8))   # NEW 53
+        for (ox0, oy0, ox1, oy1) in others:                 # NEW 62: other rings and labels count too
+            gx = max(x0 - ox1, ox0 - x1, 0)                 # NEW 62: gap left to right (0 if they overlap sideways)
+            gy = max(y0 - oy1, oy0 - y1, 0)                 # NEW 62: gap top to bottom
+            gap = min(gap, float(np.hypot(gx, gy)))         # NEW 62
+        return gap                                          # NEW 61
+
     best = None                                             # NEW 52
-    for reach in (34, 48, 64):                              # NEW 52: close to the ring first, then a bit farther
-        for k in range(24):                                 # NEW 52: 315 (up-right) first, then every 15 degrees round
-            deg = (315 + 15 * k) % 360                      # NEW 52
+    for reach in (16, 24, 32, 42):                          # NEW 63, NEW 70: PHASE 1: straight above, a little higher each time until free (max 42, farther would look like it belongs to another ring)
+        ax_, ay_ = sx, sy - reach                           # NEW 63: label sits right above this point
+        x0, x1, y0, y1 = ax_ - tw / 2, ax_ + tw / 2, ay_ - th, ay_   # NEW 63: the label box (y goes DOWN, so above = smaller y)
+        if x0 < 0 or y0 < 0 or x1 > w or y1 > h:            # NEW 52: box would leave the picture
+            continue                                        # NEW 52
+        gap = clearance(x0, y0, x1, y1)                     # NEW 63
+        if best is None or gap > best[0]:                   # NEW 63
+            best = (gap, ax_, ay_, "center", "bottom", (x0, y0, x1, y1))   # NEW 63
+        if gap >= enough:                                   # NEW 63: free, so keep it
+            return (gap, ax_, ay_, "center", "bottom", (x0, y0, x1, y1))   # NEW 63
+
+    turns = [0] + [sg * 15 * k for k in range(1, 12) for sg in (1, -1)] + [180]   # NEW 64: PHASE 2: 0, +15, -15, +30, -30 ... 180 degrees away from 'up'
+    for reach in (34, 48, 64):                              # NEW 54: close to the ring first, then a bit farther
+        for turn in turns:                                  # NEW 64
+            deg = (270 + turn) % 360                        # NEW 64: 270 = straight up
             c, s_ = np.cos(np.radians(deg)), np.sin(np.radians(deg))   # NEW 52
             ax_, ay_ = sx + reach * c, sy + reach * s_      # NEW 52: where the label touches the ring side
             ha = "right" if c < -0.3 else ("left" if c > 0.3 else "center")   # NEW 52
@@ -34,19 +61,13 @@ def pick_label_spot(sx, sy, tw, th, all_pts, dots, w, h, enough=12):   # NEW 52
             y1 = y0 + th                                    # NEW 52
             if x0 < 0 or y0 < 0 or x1 > w or y1 > h:        # NEW 52: box would leave the picture
                 continue                                    # NEW 52
-            dx = np.maximum(np.maximum(x0 - all_pts[:, 0], 0), all_pts[:, 0] - x1)   # NEW 53: distance from every line point to the box
-            dy = np.maximum(np.maximum(y0 - all_pts[:, 1], 0), all_pts[:, 1] - y1)   # NEW 53
-            gap = float(np.hypot(dx, dy).min())             # NEW 53: closest line point
-            for (x, y, r) in dots:                          # NEW 53: dots count too (real size is r - 8)
-                ddx = max(x0 - x, 0, x - x1)                # NEW 53
-                ddy = max(y0 - y, 0, y - y1)                # NEW 53
-                gap = min(gap, float(np.hypot(ddx, ddy)) - (r - 8))   # NEW 53
-            if best is None or gap > best[0]:               # NEW 54: strictly better wins, so ties keep the earlier choice
-                best = (gap, ax_, ay_, ha, va)              # NEW 54
-        if best is not None and best[0] >= enough:          # NEW 54: good enough at this distance, stop here
-            return best                                     # NEW 54
+            gap = clearance(x0, y0, x1, y1)                 # NEW 65
+            if best is None or gap > best[0]:               # NEW 54: remember the best one in case none is good enough
+                best = (gap, ax_, ay_, ha, va, (x0, y0, x1, y1))   # NEW 54
+            if gap >= enough:                               # NEW 65: first good spot (nearest to 'up') wins
+                return (gap, ax_, ay_, ha, va, (x0, y0, x1, y1))   # NEW 65
     if best is None:                                        # NEW 54: nothing fitted at all, use up-right
-        return (0.0, sx + 24, sy - 24, "left", "bottom")    # NEW 54
+        return (0.0, sx + 24, sy - 24, "left", "bottom", (sx + 24, sy - 24 - th, sx + 24 + tw, sy - 24))   # NEW 54
     return best                                             # NEW 54
 
 
@@ -63,7 +84,9 @@ def make_animation(data, speed=20, hold=15, verbose=False):   # NEW 36, NEW 55: 
     ax.axis("off")                                          # NEW 37: no axes, like a clean paper
     all_pts = np.vstack(strands)                            # NEW 56: every line point, so labels can keep away from them
     unit = w / (fig.get_figwidth() * fig.dpi)               # NEW 56: picture pixels per screen pixel
-    label_size = 14                                         # NEW 56: font size of the labels
+    label_size = 12                                         # NEW 56, NEW 66: font size of the labels (12 = a bit smaller than before)
+    ring_boxes = [(st[0][0] - 10, st[0][1] - 10, st[0][0] + 10, st[0][1] + 10) for st in strands]   # NEW 67: a small box around every start ring
+    placed = []                                             # NEW 67: label boxes placed so far
 
     for x, y, r in data["dots"]:                            # NEW 38: dots are ALWAYS there, from frame 1
         ax.add_patch(Circle((x, y), r - 8, color="black"))  # NEW 38: r - 8 = the real dot size (r had +8 for the red ring)
@@ -73,12 +96,14 @@ def make_animation(data, speed=20, hold=15, verbose=False):   # NEW 36, NEW 55: 
     for i, st in enumerate(strands):                        # NEW 40: one green start marker per strand, hidden for now
         ring = Circle((st[0][0], st[0][1]), 10, fill=False, ec="green", lw=2.5, visible=False)   # NEW 40
         ax.add_patch(ring)                                  # NEW 40
-        text = str(i + 1) if len(strands) > 1 else "start"   # NEW 57: the label text
-        tw = 0.65 * label_size * fig.dpi / 72 * len(text) * unit   # NEW 57: label width in picture pixels (a guess, a bit generous)
+        text = "Start %d" % (i + 1)                         # NEW 68: ONE naming for every image: Start 1, Start 2 ... (also when there is only one strand)
+        tw = 0.5 * label_size * fig.dpi / 72 * len(text) * unit   # NEW 57, NEW 69: label width in picture pixels (measured: real width is about 6 percent less)
         th = 1.3 * label_size * fig.dpi / 72 * unit         # NEW 57: label height in picture pixels
-        gap, lx, ly, ha, va = pick_label_spot(st[0][0], st[0][1], tw, th, all_pts, data["dots"], w, h)   # NEW 58: best free spot
+        others = [bx for j, bx in enumerate(ring_boxes) if j != i] + placed   # NEW 67: other rings and earlier labels to keep away from
+        gap, lx, ly, ha, va, box = pick_label_spot(st[0][0], st[0][1], tw, th, all_pts, data["dots"], w, h, others)   # NEW 58, NEW 60: best free spot
+        placed.append(box)                                  # NEW 67
         if verbose:                                         # NEW 58
-            print("   label", text, "| closest line or dot is", round(gap), "px away")   # NEW 58
+            print("   label", text, "| closest line, dot, ring or label is", round(gap), "px away |", "straight above" if (ha, va) == ("center", "bottom") and abs(lx - st[0][0]) < 1e-6 else "moved aside")   # NEW 58, NEW 69
         label = ax.text(lx, ly, text, color="green", fontsize=label_size, weight="bold", visible=False, ha=ha, va=va)   # NEW 59
         starts.append((ring, label))                        # NEW 40
 
