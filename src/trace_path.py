@@ -1,4 +1,5 @@
 import os
+import json                                                 # NEW 22
 import cv2
 import numpy as np
 import networkx as nx                                       # NEW 9
@@ -187,6 +188,21 @@ def build_strands(G, roads):                               # NEW 18
     return strands, report                                 # NEW 18
 
 
+def save_path_data(name, shape, strands, marks):           # NEW 23
+    """Save everything the animation needs in one small file: results/path_<name>.json"""
+    data = {                                               # NEW 23: a plain dictionary
+        "image": name,                                     # NEW 23
+        "height": int(shape[0]),                           # NEW 23: picture size
+        "width": int(shape[1]),                            # NEW 23
+        "crossings": [[int(round(x)), int(round(y))] for x, y in marks],       # NEW 23: crossing centres
+        "strands": [[[int(x), int(y)] for x, y in st] for st in strands],      # NEW 23: each strand = list of points
+    }
+    out = os.path.join(RES, "path_" + os.path.splitext(name)[0] + ".json")     # NEW 23: path_k01.json
+    with open(out, "w") as f:                              # NEW 23
+        json.dump(data, f)                                 # NEW 23: write the card
+    return out                                             # NEW 23
+
+
 def draw_strokes(strokes, shape, marks=()):                # NEW 12
     """Picture of the strokes: blue = start, red = end, numbers = point positions."""
     out = np.zeros(shape + (3,), np.uint8)                 # NEW 12: black picture
@@ -236,3 +252,11 @@ if __name__ == "__main__":                                 # NEW 8: check EVERY 
 
         marks = [d["pos"] for n, d in G.nodes(data=True) if n.startswith("J")]   # NEW 21: crossing centres
         cv2.imwrite(os.path.join(RES, "path_" + name), draw_strokes(strands, slab.shape, marks))   # NEW 21: save the picture
+
+        saved = save_path_data(name, slab.shape, strands, marks)   # NEW 24: save the data card
+        with open(saved) as f:                             # NEW 25: read it back to check
+            back = json.load(f)                            # NEW 25
+        same = [len(x) for x in back["strands"]] == [len(x) for x in strands]   # NEW 25
+        print("   DATA TEST: saved", os.path.basename(saved), "| strands", len(back["strands"]),
+              "| points", sum(len(x) for x in back["strands"]), "| crossings", len(back["crossings"]),
+              "| same as in memory", same)                  # NEW 25
