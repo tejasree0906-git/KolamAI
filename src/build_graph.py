@@ -15,7 +15,8 @@ for base in (os.getcwd(), HERE, os.path.dirname(HERE)):
         RES = os.path.join(base, "results")
         break
 else:
-    raise SystemExit("Cannot find the results folder. Run detect_dots.py first, then run this file.")
+    RES = os.path.join(os.getcwd(), "results")              # NEW 73: no folder yet (for example on the server), make one
+    os.makedirs(RES, exist_ok=True)                         # NEW 73
 
 
 def build_graph(name):

@@ -4,6 +4,8 @@ from skimage.morphology import skeletonize         # NEW 3: thins a line to 1 pi
 
 def detect_dots(path):
     img = cv2.imread(path)
+    if img is None:                                        # NEW 71: not a picture, or cannot be opened
+        raise ValueError("cannot read this file as an image")   # NEW 71: the app will turn this into a friendly message
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     blur = cv2.GaussianBlur(gray, (5, 5), 0)
     _, bw = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
@@ -56,5 +58,6 @@ def detect_dots(path):
         json.dump(dots, f)                                   # NEW 29: list of [x, y, radius]
     return count
 
-for name in ["k01.png", "k02.png", "k03.png", "k04.png"]:
-    print(name, "-> found", detect_dots("data/real/" + name), "expected 9")
+if __name__ == "__main__":                                 # NEW 72: run the 4-image test only when THIS file is run, not when the app imports it
+    for name in ["k01.png", "k02.png", "k03.png", "k04.png"]:   # NEW 72
+        print(name, "-> found", detect_dots("data/real/" + name), "expected 9")   # NEW 72
