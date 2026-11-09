@@ -28,10 +28,21 @@ def run_pipeline(path, speed=15):                            # NEW 77
         raise ValueError("I could not find a line pattern in this picture.")   # NEW 79
     G, slab, jlab = result                                   # NEW 79
 
+    loose = [n for n in G.nodes if G.degree(n) % 2 == 1]     # NEW 84: LOCK 1. Odd degree = a loose end or a stray stick
+    if loose:                                                # NEW 84
+        raise ValueError("This picture is too blurry, or it has a stray mark. "
+                         "I found a loose line end, so I cannot trace it safely. "
+                         "Please try a sharper picture.")   # NEW 84
+
     roads = order_all_roads(G, slab)                         # NEW 80: stage 4: path
     strands, report = build_strands(G, roads)                # NEW 80
     if not strands:                                          # NEW 80
         raise ValueError("I could not trace a drawing path in this picture.")   # NEW 80
+
+    if not all(r[1] for r in report):                        # NEW 85: LOCK 2. Every strand must close into a loop
+        raise ValueError("I could not draw this pattern as closed loops. "
+                         "Please try a sharper picture.")   # NEW 85
+
     marks = [d["pos"] for n, d in G.nodes(data=True) if n.startswith("J")]   # NEW 80: crossing centres (the data file expects them)
     save_path_data(name, slab.shape, strands, marks)         # NEW 80: writes results/path_<stem>.json
 
