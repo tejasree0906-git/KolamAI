@@ -26,8 +26,8 @@ Learning a kolam from a finished picture is hard. You can see *what* it looks li
 
 <div align="center">
 
-<img src="docs/images/anim_k24.gif" width="380"><br>
-<sub>The app's animation for <b>k24</b>. Dots appear first, then the line is drawn.</sub>
+<img src="docs/images/k24/anim_k24.gif" width="380"><br>
+<sub>The app's animation for <b>k24</b> (13 dots, grid 1-3-5-3-1). Dots appear first, then the line is drawn.</sub>
 
 </div>
 
@@ -35,7 +35,7 @@ Learning a kolam from a finished picture is hard. You can see *what* it looks li
 
 ## 🔍 How it works
 
-No deep learning and nothing is trained. Every stage is classical computer vision, so each step can be seen and explained.
+No deep learning and nothing is trained. Every stage is classical computer vision, so each step can be seen and explained. All pictures below are **k24**.
 
 ```mermaid
 flowchart LR
@@ -56,14 +56,16 @@ flowchart LR
 
 <table>
   <tr>
-    <td align="center"><img src="docs/images/01_dots_k01.png" width="250"></td>
-    <td align="center"><img src="docs/images/02_skeleton_k01.png" width="250"></td>
-    <td align="center"><img src="docs/images/03_graph_k01.png" width="250"></td>
+    <td align="center"><img src="docs/images/k24/k24.png" width="200"></td>
+    <td align="center"><img src="docs/images/k24/skel_k24.png" width="200"></td>
+    <td align="center"><img src="docs/images/k24/graph_k24.png" width="200"></td>
+    <td align="center"><img src="docs/images/k24/path_k24.png" width="200"></td>
   </tr>
   <tr>
-    <td align="center"><b>1. Find the dots</b><br><sub>Blur, Otsu threshold, keep only round shapes of the right size</sub></td>
-    <td align="center"><b>2. Thin the lines</b><br><sub>Erase dots and specks, then shrink every line to 1 pixel</sub></td>
-    <td align="center"><b>3. Build the graph</b><br><sub>Green rings are crossings. Lines between them are edges</sub></td>
+    <td align="center"><b>1. Find the dots</b><br><sub>Blur, Otsu threshold, keep only round shapes of the right size. Red rings mark the dots</sub></td>
+    <td align="center"><b>2. Thin the lines</b><br><sub>Erase dots, specks and the frame, then shrink every line to 1 pixel</sub></td>
+    <td align="center"><b>3. Build the graph</b><br><sub>Green rings are crossings, blue rings are line ends. Lines between them are edges</sub></td>
+    <td align="center"><b>4. Trace the path</b><br><sub>Numbers show the drawing order. Green ring = start, white ring = crossing</sub></td>
   </tr>
 </table>
 
@@ -71,11 +73,11 @@ flowchart LR
 
 | Stage | What it does | Tools |
 | --- | --- | --- |
-| **Dots** | Finds every dot. Keeps a shape only if its area (100 to 4000 px), box shape and roundness fit. A small shape sitting inside a bigger dot is ignored | `GaussianBlur`, Otsu threshold, `connectedComponentsWithStats` |
-| **Skeleton** | Removes dots, specks and the frame, thins the line to 1 pixel, cuts tiny tails (15 px or less) and tiny loose pieces (under 50 px) | `skimage.morphology.skeletonize` |
-| **Graph** | Counts each pixel's neighbours to find crossings and dead ends. Joins them as nodes and edges. Two crossings linked by a road of 5 px or less become one | `filter2D`, `dilate`, NetworkX `MultiGraph` |
-| **Path** | At every crossing, pairs the two road ends that point most opposite, so the line goes straight through like a hand. Follows the pairs until the line closes | dot product of directions |
-| **Animation** | Draws the dots, then the line, step by step. Every dot has the same size. Default speed is 5, slider 2 to 20 | Matplotlib `FuncAnimation` |
+| **Dots** | Finds every dot. A shape counts only if its area (100 to 4000 px), box shape (width/height 0.6 to 1.5) and roundness (above 0.5) fit. A small shape whose centre sits inside a bigger dot is ignored | `GaussianBlur`, Otsu threshold, `connectedComponentsWithStats` |
+| **Skeleton** | Erases the dots, removes specks and the picture frame, thins the line to 1 pixel | `skimage.morphology.skeletonize` |
+| **Graph** | Cuts tiny tails (15 px or less) and tiny loose pieces (under 50 px). Counts each pixel's neighbours to find crossings (3 or more) and dead ends (1). Glues crossroad pixels that touch into one junction. Two junctions linked by a road of 5 px or less become one. Roads between them become edges | `filter2D`, `dilate`, NetworkX `MultiGraph` |
+| **Path** | At every crossing, pairs the two road ends that point most opposite, so the line goes straight through like a hand. Follows the pairs until the line closes. Saves the points as JSON | dot product of directions |
+| **Animation** | Draws the dots, then the line, step by step. Every dot has the same size. Default speed is 5, slider 2 to 20. Saved as a GIF | Matplotlib `FuncAnimation`, Pillow |
 
 **Two safety locks** stop a bad picture before it draws a wrong animation:
 
@@ -91,7 +93,7 @@ The app then shows a friendly message instead of a broken drawing.
 
 <br>
 
-Where every crossing has an even number of lines (4 in our pictures), a connected piece can be traced in one continuous stroke that ends where it started. This is an Eulerian circuit. A plain Eulerian walk can turn sharply at a crossing, which a hand would not do. So the path stage uses the straight-through rule on top of it.
+Where every crossing has an even number of lines, a connected piece can be traced in one continuous stroke that ends where it started. This is an Eulerian circuit. A plain Eulerian walk can turn sharply at a crossing, which a hand would not do (this failed on our first attempt). So the path stage pairs the most opposite road ends at each crossing and goes straight through.
 
 </details>
 
@@ -99,30 +101,43 @@ Where every crossing has an even number of lines (4 in our pictures), a connecte
 
 ## 📊 Results
 
-Evaluated on a **test set of 25 clean, top-down dot kolams** (k01 to k25). Nothing is trained. The correct dot count of every picture was written by hand **before** running the program (`data/labels.csv`).
+Evaluated on a **test set of 25 clean, top-down dot kolams** (k01 to k25). **Nothing is trained.** The correct dot count of every picture was written by hand **before** running the program (`data/labels.csv`). All 25 were marked `clean` by eye.
 
 k05 to k25 were hand-drawn on paper and digitized with ChatGPT.
 
+Every run: 25 pictures, resized to 500 px wide, speed 40.
+
 | Run | Change | Dots correct | Whole pipeline OK |
 | --- | --- | :---: | :---: |
-| baseline | none | not recorded | 18 / 25 (72%) |
-| after fix 1 | min dot area 150 to 100 | 24 / 25 | 23 / 25 |
-| after fix 2 | max dot area 4000 to 300 *(a guess, backfired)* | 21 / 25 | 19 / 25 |
+| baseline | dot area 150 to 4000 | not recorded | 18 / 25 (72%) |
+| after fix 1 | min dot area 150 to 100 | 24 / 25 | 23 / 25 (strict count 22) |
+| after fix 2 | max dot area 4000 to 300 *(a guess, it backfired)* | 21 / 25 | 19 / 25 |
 | after fix 3 | min 120, max back to 4000 | 24 / 25 | 21 / 25 |
 | after fix 4 | cut tiny tails (15 px) | 24 / 25 | 23 / 25 |
 | after fix 5 | drop tiny skeleton pieces (50 px) | 24 / 25 | 24 / 25 |
 | after fix 6 | min 100 + duplicate-dot rule | 25 / 25 | 25 / 25 |
 | **after fix 8** | glue split crossings (5 px) | **25 / 25** | **25 / 25** |
 
-| Group | Pictures | Pipeline OK |
+Groups after fix 8:
+
+| Group | Pictures | Dots and pipeline OK |
 | --- | :---: | :---: |
 | 3x3 dots (9) | 15 | 15 / 15 |
 | 2-4-4-2 dots (12) | 5 | 5 / 5 |
 | 1-3-5-3-1 dots (13) | 5 | 5 / 5 |
 
-Every number came from measuring first (small diagnostic scripts), then changing one thing, then re-running all 25. The full story, with proof for each fix, is in [`docs/failures.md`](docs/failures.md).
+Every fix came from measuring first (small diagnostic scripts), then changing one thing, then re-running all 25. The proof for each fix is in [`docs/failures.md`](docs/failures.md).
 
-**Bad-input tests** (blurry picture, huge picture, a text file renamed `.png`, a blank picture) do not crash the app. It shows a friendly message or runs normally.
+**Checked by eye (finger test, following the animation like a pencil):** k01 to k04, k05, k10, k16, k19, k21, k22 and k24. All pass. The other 14 pictures are not yet checked by eye.
+
+**App tests**
+
+| Test | Result |
+| --- | --- |
+| Public link on 2 phones | worked on both |
+| k05 and k10 on the public link | both under 20 seconds |
+| Longest picture k04 (6835 points) on the laptop | 20.9 seconds (not timed on the cloud) |
+| Bad input (14 Nov): blurry picture, huge picture (4000 px), text file renamed `.png`, blank picture | no crash. Blurry stopped by Lock 1 with a friendly message. These tests were run before fixes 4 to 8 and not repeated since |
 
 <br>
 
@@ -141,7 +156,7 @@ python src/pipeline.py data/real/k03.png    # one picture, no app
 python run_all.py my_run                    # all 25 pictures, saves a csv and a log
 ```
 
-Run all commands from the project root. Input images go in `data/real/`, outputs are saved in `results/`.
+Run all commands from the project root. Input pictures go in `data/real/`, outputs are saved in `results/`. `requirements.txt` uses `opencv-python-headless`, which the cloud server needs.
 
 <details>
 <summary><b>Project layout</b></summary>
@@ -149,8 +164,9 @@ Run all commands from the project root. Input images go in `data/real/`, outputs
 ```
 KolamAI/
 ├── src/
+│   ├── fake_generator.py  fake dot pictures with a known answer
 │   ├── detect_dots.py     dots, curve cleanup, skeleton
-│   ├── build_graph.py     spur prune, speck drop, graph
+│   ├── build_graph.py     tail cut, speck drop, graph
 │   ├── trace_path.py      straight-through strands
 │   ├── animate_path.py    path to GIF
 │   └── pipeline.py        all stages + the two locks
@@ -172,8 +188,9 @@ KolamAI/
 - Works on **clean, top-down dot kolams** only. Street photos with shadows, tilt or faded powder are not supported.
 - The sizes (min dot 100 px, tail 15 px, speck 50 px, glue 5 px) were chosen on the **same 25 pictures** used to test. So 100% is **not** a fair estimate for new pictures.
 - A real tail shorter than 15 px would be cut. A real dot smaller than 100 px would be missed.
-- The locks check the result, not the blur itself.
-- 100% means the strands close. It does not prove the path looks right. Only **11 of 25** pictures were checked by eye (finger test). One picture (k10) passed both locks and was still wrong until the eye caught it.
+- The locks check the result, not the blur itself. A blurry picture that still gives clean even crossings would pass.
+- 100% means every strand closes. It does not prove the path looks right: k10 passed both locks and was still wrong until the eye caught it. Only 11 of 25 pictures were checked by eye.
+- The 21 newest pictures are hand-drawn and redrawn by ChatGPT, not photos.
 - Every upload is saved under one file name, so two people at the same time could overwrite each other. Fine for a demo.
 
 <br>
@@ -184,11 +201,13 @@ KolamAI/
 | :---: | --- |
 | ✅ | Dot detection, skeleton, graph |
 | ✅ | Straight-through drawing path |
-| ✅ | Step-by-step animation with speed slider |
-| ✅ | Streamlit app, deployed on Streamlit Community Cloud |
+| ✅ | Step-by-step animation, equal dots, speed slider (2 to 20) |
+| ✅ | Streamlit app deployed on Streamlit Community Cloud, tested on 2 phones |
 | ✅ | Two safety locks and bad-input tests |
-| 🔜 | A fresh test set the settings were not tuned on |
-| 🔜 | Automatic check that the path looks right, not only that it closes |
+| ✅ | 25-picture test set with hand-written labels, 7 failures found and fixed with proof |
+| 🔜 | Test on fresh pictures the settings were not tuned on |
+| 🔜 | Check the remaining 14 pictures by eye, and an automatic check that the path looks right |
+| 🔜 | Lock 3: blur score at the start |
 | 🔜 | Tail and speck sizes relative to image size |
 | 🔜 | Photos taken in the street (shadows, tilt) |
 | 🔜 | Symmetry analysis and motif extraction |
