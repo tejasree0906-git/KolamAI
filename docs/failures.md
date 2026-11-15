@@ -2,6 +2,7 @@
 
 Kolam AI | One row per failure: image, stage, what went wrong, what fixed it.
 Add a row only when something really breaks. This is the answer bank for questions C5 and H2.
+Last updated: 15 Nov 2026, 11:55 IST.
 
 | # | Image | Stage | What went wrong | What fixed it |
 | --- | --- | --- | --- | --- |
@@ -17,23 +18,28 @@ Add a row only when something really breaks. This is the answer bank for questio
 | 10 | k03 copy, 4000 x 3800 px (bad-input test A, 14 Nov) | App, resize | NOT a failure. Test of a huge picture. The app ran the whole pipeline as a normal picture, found dots and showed the path trace. No crash. Teju: "works pretty well". Dot count and GIF details were not written down | Nothing needed. The app resizes every upload to 500 px wide before any stage, so a huge picture is made small first |
 | 11 | Text file renamed `trap.png` (bad-input test B, 14 Nov) | App, open check | NOT a failure. The app said the file is not an image and did not crash. Exact words on screen NOT yet copied (the code's message is "This file is not a picture I can open.") | `cv2.imdecode` returns nothing for a non-picture, and the app shows the friendly sentence. TO DO: re-run and copy the exact words |
 | 12 | All-white `blank.png` (bad-input test C, 14 Nov) | Dots | NOT a failure. The app said there are no dots and did not crash. Exact words on screen NOT yet copied (the code's message is "I could not find any dots in this picture.") | `run_pipeline` stops when the dot count is 0 and the app shows the friendly sentence. TO DO: re-run and copy the exact words |
-| 13 | k17, k18, k19, k20 (12 dots, 2-4-4-2) | Dots | Baseline run, 15 Nov. Message "I could not find any dots in this picture." although each picture has 12 dots. Terminal: curve pieces kept 13, 13, 14, 16 (the dots stayed in the line picture). `dot_diag.py` on k17 (500 px): all 12 dots have area 138 to 145 px, just BELOW the minimum 150. Their width/height (0.93 to 1.08) and roundness (0.90 to 1.07) pass. So only the area test rejects them. k16 (same grid) dots have area 177 to 187 px and pass. k18 to k20 not yet checked with `dot_diag.py`. Proof: `docs/proof/dot_diag_k17_k16_15Nov2026.txt` | OPEN, cause known for k17. Fix try 1: lower the minimum dot area from 150 to 100 in `detect_dots.py`, then `python run_all.py after_fix1` and check that k01 to k16 still pass and no picture gets MORE dots than expected (a small round speck could pass the lower limit) |
-| 14 | k10 (3x3, 9 dots) | Graph, Lock 1 | Baseline run, 15 Nov. Lock 1 stopped it with the loose-end message. Printed: 2 endpoints, 2 pieces, 10 junctions, 23 roads, degrees 1, 1, 4 x8, 6, 6 (two nodes with 1 road). Cause NOT known yet. Dots found not recorded in the baseline | OPEN. Next: look at `results/skel_k10.png` and the graph picture for a break or a stray mark |
-| 15 | k22 (13 dots, 1-3-5-3-1) | Graph, Lock 1 | Baseline run, 15 Nov. Lock 1 stopped it. Printed: 4 endpoints, 4 pieces, 18 junctions, 33 roads, degrees 0, 0, 0, 1, 2, 2, 2, 3, 4 x14 (odd nodes: 1 and 3). Cause NOT known yet. Dots found not recorded in the baseline | OPEN. Next: look at `results/skel_k22.png` |
-| 16 | k24 (13 dots, 1-3-5-3-1) | Graph, Lock 1 | Baseline run, 15 Nov. Lock 1 stopped it. Printed: 2 endpoints, 2 pieces, 15 junctions, 29 roads, degrees 0, 1, 2, 3, 4 x13 (odd nodes: 1 and 3). Cause NOT known yet. Dots found not recorded in the baseline | OPEN. Next: look at `results/skel_k24.png` |
+| 13 | k17, k18, k19, k20 (12 dots, 2-4-4-2) | Dots | Baseline run, 15 Nov. Message "I could not find any dots in this picture." although each picture has 12 dots. Terminal: curve pieces kept 13, 13, 14, 16 (the dots stayed in the line picture). `dot_diag.py` on k17 (500 px): all 12 dots have area 138 to 145 px, just BELOW the minimum 150. Width/height (0.93 to 1.08) and roundness (0.90 to 1.07) pass. So only the area test rejects them. k16 (same grid) dots have area 177 to 187 px and pass. k18 to k20 were not checked with `dot_diag.py`. Proof: `docs/proof/dot_diag_k17_k16_15Nov2026.txt` | FIXED (fix 1, 15 Nov): minimum dot area 150 -> 100. after_fix1: k17 to k20 all found 12 of 12. Later set to 120 (fix 3, row 18), which keeps the k17 dots (138 to 145). In after_fix3 one 2-4-4-2 picture has a wrong dot count again: see row 19 |
+| 14 | k10 (3x3, 9 dots) | Graph, Lock 1, then dots | Baseline: Lock 1 stopped it (2 endpoints, degrees 1, 1, 4 x8, 6, 6). After fix 1 the Lock 1 stop was gone but the picture found 10 dots instead of 9 (degrees 4 x8, 6, 6, no endpoints) and the script still counted it "OK" (a false pass). `dot_diag.py k10` (15 Nov): id 6 area 649, 40x40, roundness 0.52 passes as a dot; id 9 area 108, 12x11, roundness 0.95 (rejected at min 150, allowed at min 100). `dots_k10.png` showed a double ring on the centre dot | Dot count fixed by fix 3 (min 120): 3x3 dots correct 15 of 15, which supports that id 9 was the false dot. Whether k10 now passes the whole pipeline is NOT confirmed: in after_fix3 one 3x3 picture still fails (row 19). Need the log lines |
+| 15 | k22 (13 dots, 1-3-5-3-1) | Graph, Lock 1 | Baseline and after_fix1: Lock 1 stopped it. 4 endpoints, 4 pieces, 18 junctions, 33 roads, degrees 0, 0, 0, 1, 2, 2, 2, 3, 4 x14. Dots found 13 of 13 (after_fix1), so dot detection is not the cause. `skel_k22.png` shows small tails at the four sharp tips. OUR READING, NOT PROVEN: the thinning step leaves tiny spurs at sharp tips and the graph counts them as loose ends | OPEN. Proposed fix: spur-prune (delete dead-end branches shorter than about 15 px) before the graph. 45-minute cap, then list as a limitation |
+| 16 | k24 (13 dots, 1-3-5-3-1) | Graph, Lock 1 | Baseline and after_fix1: Lock 1 stopped it. 2 endpoints, 2 pieces, 15 junctions, 29 roads, degrees 0, 1, 2, 3, 4 x13. Dots found 13 of 13 (after_fix1). `skel_k24.png` shows a spike at the top tip and a small hook at the bottom-right corner of the triangle. Same reading as row 15, NOT PROVEN | OPEN. Same spur-prune fix |
+| 17 | k01 to k15 (3x3) | Dots (fix attempt) | Fix 2 (15 Nov): max dot area 4000 -> 300, because I guessed the 649 px shape in k10 was a blob. It BACKFIRED: 3x3 dots correct fell 14 -> 11, pipeline OK 23 -> 19 (76%). The 649 px shape is probably the real centre dot, and 300 rejected centre dots in other pictures. The cause in the other pictures was not checked with `dot_diag.py` (inferred from the counts) | Reverted in fix 3 (max back to 4000). Lesson: run `dot_diag` on every affected picture before changing a number. Keep `run_all_after_fix2` in `docs/proof/` as an honest failed attempt |
+| 18 | k10 plus all 3x3 | Dots (fix) | Fix 3 (15 Nov): min dot area 100 -> 120, max back to 4000. Reason: id 9 in k10 (area 108) is a small speck that is not a dot, and the k17 dots (138 to 145) must stay | after_fix3: dots correct 24 of 25 = 96%, pipeline OK 21 of 25 = 84%. This is the FINAL dot setting. Do not tune it again |
+| 19 | one 3x3 picture and one 2-4-4-2 picture (names not known yet) | Dots / graph | after_fix3 summary: 3x3 dots 15 of 15 but pipeline OK 14, so one 3x3 picture stops at a later stage. 2-4-4-2 dots 4 of 5, so one picture finds the wrong dot count (possibly a dot below 120 px, NOT proven). Names and messages not seen yet | OPEN. Next: paste `Select-String "^k\d+\.png" results\run_all_after_fix3_log.txt`, then `dot_diag.py` on the 2-4-4-2 picture |
 
 
-## Baseline run on 25 pictures (15 Nov 2026, before any fix)
+## Baseline and fix runs on 25 pictures (15 Nov 2026)
 
-Proof: `docs/proof/run_all_BASELINE_15Nov2026.csv` and `docs/proof/run_all_BASELINE_diagnostics_15Nov2026.csv`. Answers: `data/labels.csv` (counted by Teju before the run). All pictures resized to 500 px wide, speed 40.
+Proof: `docs/proof/run_all_BASELINE_15Nov2026.csv`, `..._diagnostics_15Nov2026.csv`, `run_all_after_fix1/2/3.csv` and `_log.txt`. Answers: `data/labels.csv` (counted by Teju before the run). All pictures resized to 500 px wide, speed 40.
 
-| Group | Pictures | Pipeline OK | Failed |
-| --- | --- | --- | --- |
-| 3x3, 9 dots (k01 to k15) | 15 | 14 | k10 (Lock 1) |
-| 2-4-4-2, 12 dots (k16 to k20) | 5 | 1 (k16) | k17, k18, k19, k20 (no dots found) |
-| 1-3-5-3-1, 13 dots (k21 to k25) | 5 | 3 (k21, k23, k25) | k22, k24 (Lock 1) |
-| TOTAL | 25 | 18 = 72% | 7 |
+| Run | Change in `detect_dots.py` | Dots correct | Pipeline OK | Verdict |
+| --- | --- | --- | --- | --- |
+| baseline | area 150 to 4000 | not recorded | 18 of 25 = 72% | below the 80% gate |
+| after_fix1 | min 150 -> 100 | 24 of 25 = 96% | 23 of 25 = 92% (strict 22 = 88%: k10 found 10 of 9 but was counted OK) | k17 to k20 fixed |
+| after_fix2 | max 4000 -> 300 | 21 of 25 = 84% | 19 of 25 = 76% | BACKFIRED |
+| after_fix3 | min 100 -> 120, max 4000 | 24 of 25 = 96% | 21 of 25 = 84% | FINAL. Passes the 80% gate |
 
-- Gate was 80%. Below the gate.
-- All 18 pictures that finished had the right dot count and all strands closed.
-- Rows 13 to 16 are the 7 failures. After each fix, run `python run_all.py after_fixN` and add a before and after line here.
+Group detail for after_fix3: 3x3 dots 15/15, OK 14. 2-4-4-2 dots 4/5, OK 4. 1-3-5-3-1 dots 5/5, OK 3.
+
+- The dot limits were tuned on the same 25 pictures. The 96% is not a fair estimate for new pictures.
+- Open: rows 15, 16 (spurs, reading only) and row 19 (names unknown).
+- After the spur-prune, run `python run_all.py after_fix4` and add a line here.
