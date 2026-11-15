@@ -1,0 +1,26 @@
+filename,width,height,dots_expected,dots_found,dots_match,strands,all_closed,status,message
+k01.png,679,674,9,9,YES,1,True,OK,
+k02.png,691,704,9,9,YES,3,True,OK,
+k03.png,700,697,9,9,YES,3,True,OK,
+k04.png,1254,1254,9,9,YES,1,True,OK,
+k05.png,1254,1254,9,9,YES,2,True,OK,
+k06.png,1254,1254,9,9,YES,3,True,OK,
+k07.png,1254,1254,9,9,YES,1,True,OK,
+k08.png,1254,1254,9,9,YES,3,True,OK,
+k09.png,1254,1254,9,9,YES,1,True,OK,
+k10.png,1254,1254,9,,NO,,,STOPPED,"This picture is too blurry, or it has a stray mark. I found a loose line end, so I cannot trace it safely. Please try a sharper picture."
+k11.png,1254,1254,9,9,YES,1,True,OK,
+k12.png,1254,1254,9,9,YES,3,True,OK,
+k13.png,1254,1254,9,9,YES,1,True,OK,
+k14.png,1254,1254,9,9,YES,3,True,OK,
+k15.png,1254,1254,9,9,YES,3,True,OK,
+k16.png,1254,1254,12,12,YES,2,True,OK,
+k17.png,1254,1254,12,,NO,,,STOPPED,I could not find any dots in this picture.
+k18.png,1254,1254,12,,NO,,,STOPPED,I could not find any dots in this picture.
+k19.png,1254,1254,12,,NO,,,STOPPED,I could not find any dots in this picture.
+k20.png,1254,1254,12,,NO,,,STOPPED,I could not find any dots in this picture.
+k21.png,1254,1254,13,13,YES,3,True,OK,
+k22.png,1254,1254,13,,NO,,,STOPPED,"This picture is too blurry, or it has a stray mark. I found a loose line end, so I cannot trace it safely. Please try a sharper picture."
+k23.png,1254,1254,13,13,YES,1,True,OK,
+k24.png,1254,1254,13,,NO,,,STOPPED,"This picture is too blurry, or it has a stray mark. I found a loose line end, so I cannot trace it safely. Please try a sharper picture."
+k25.png,1254,1254,13,13,YES,1,True,OK,
