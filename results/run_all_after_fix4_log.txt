@@ -1,0 +1,232 @@
+   curve pieces kept: 1 dropped: 0
+   curve pixels: 23217 -> skeleton pixels: 2656
+   spurs cut: 0
+   piece 1: endpoint pixels 0 | junction pixels 43
+   piece 2: junctions after merge 8
+   piece 3: roads (segments) 16
+   junctions: 8 endpoints: 0 edges: 16 pieces: 1
+   degrees: [4, 4, 4, 4, 4, 4, 4, 4]
+k01.png OK found 9 of 9 | strands 1 | closed True |  | 3s
+   curve pieces kept: 1 dropped: 0
+   curve pixels: 27735 -> skeleton pixels: 3740
+   spurs cut: 0
+   piece 1: endpoint pixels 0 | junction pixels 82
+   piece 2: junctions after merge 16
+   piece 3: roads (segments) 32
+   junctions: 16 endpoints: 0 edges: 32 pieces: 1
+   degrees: [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+k02.png OK found 9 of 9 | strands 3 | closed True |  | 4s
+   curve pieces kept: 2 dropped: 0
+   curve pixels: 22625 -> skeleton pixels: 2698
+   spurs cut: 0
+   piece 1: endpoint pixels 0 | junction pixels 43
+   piece 2: junctions after merge 8
+   piece 3: roads (segments) 16
+   junctions: 8 endpoints: 0 edges: 16 pieces: 2
+   degrees: [4, 4, 4, 4, 4, 4, 4, 4]
+k03.png OK found 9 of 9 | strands 3 | closed True |  | 4s
+   curve pieces kept: 1 dropped: 1
+   curve pixels: 22134 -> skeleton pixels: 2706
+   spurs cut: 0
+   piece 1: endpoint pixels 0 | junction pixels 48
+   piece 2: junctions after merge 10
+   piece 3: roads (segments) 20
+   junctions: 10 endpoints: 0 edges: 20 pieces: 1
+   degrees: [4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+k04.png OK found 9 of 9 | strands 1 | closed True |  | 3s
+   curve pieces kept: 1 dropped: 1
+   curve pixels: 15485 -> skeleton pixels: 1907
+   spurs cut: 0
+   piece 1: endpoint pixels 0 | junction pixels 53
+   piece 2: junctions after merge 8
+   piece 3: roads (segments) 16
+   junctions: 8 endpoints: 0 edges: 16 pieces: 1
+   degrees: [4, 4, 4, 4, 4, 4, 4, 4]
+k05.png OK found 9 of 9 | strands 2 | closed True |  | 2s
+   curve pieces kept: 3 dropped: 1
+   curve pixels: 21178 -> skeleton pixels: 2681
+   spurs cut: 0
+   piece 1: endpoint pixels 0 | junction pixels 30
+   piece 2: junctions after merge 6
+   piece 3: roads (segments) 12
+   junctions: 6 endpoints: 0 edges: 12 pieces: 3
+   degrees: [4, 4, 4, 4, 4, 4]
+k06.png OK found 9 of 9 | strands 3 | closed True |  | 3s
+   curve pieces kept: 1 dropped: 1
+   curve pixels: 19656 -> skeleton pixels: 2364
+   spurs cut: 0
+   piece 1: endpoint pixels 0 | junction pixels 45
+   piece 2: junctions after merge 8
+   piece 3: roads (segments) 16
+   junctions: 8 endpoints: 0 edges: 16 pieces: 1
+   degrees: [4, 4, 4, 4, 4, 4, 4, 4]
+k07.png OK found 9 of 9 | strands 1 | closed True |  | 3s
+   curve pieces kept: 1 dropped: 1
+   curve pixels: 21142 -> skeleton pixels: 2569
+   spurs cut: 0
+   piece 1: endpoint pixels 0 | junction pixels 51
+   piece 2: junctions after merge 10
+   piece 3: roads (segments) 20
+   junctions: 10 endpoints: 0 edges: 20 pieces: 1
+   degrees: [4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+k08.png OK found 9 of 9 | strands 3 | closed True |  | 3s
+   curve pieces kept: 1 dropped: 1
+   curve pixels: 20719 -> skeleton pixels: 2452
+   spurs cut: 0
+   piece 1: endpoint pixels 0 | junction pixels 46
+   piece 2: junctions after merge 8
+   piece 3: roads (segments) 16
+   junctions: 8 endpoints: 0 edges: 16 pieces: 1
+   degrees: [4, 4, 4, 4, 4, 4, 4, 4]
+k09.png OK found 9 of 9 | strands 1 | closed True |  | 2s
+   curve pieces kept: 2 dropped: 1
+   curve pixels: 24427 -> skeleton pixels: 3258
+   spurs cut: 0
+   piece 1: endpoint pixels 2 | junction pixels 65
+   piece 2: junctions after merge 10
+   piece 3: roads (segments) 23
+   junctions: 10 endpoints: 2 edges: 23 pieces: 2
+   degrees: [1, 1, 4, 4, 4, 4, 4, 4, 4, 4, 6, 6]
+   curve pieces kept: 2 dropped: 1
+   curve pixels: 24427 -> skeleton pixels: 3258
+k10.png STOPPED found 9 of 9 | strands  | closed  | This picture is too blurry, or it has a stray mark. I found a loose line end, so I cannot trace it safely. Please try a sharper picture. | 0s
+   curve pieces kept: 1 dropped: 1
+   curve pixels: 18167 -> skeleton pixels: 2295
+   spurs cut: 0
+   piece 1: endpoint pixels 0 | junction pixels 40
+   piece 2: junctions after merge 8
+   piece 3: roads (segments) 16
+   junctions: 8 endpoints: 0 edges: 16 pieces: 1
+   degrees: [4, 4, 4, 4, 4, 4, 4, 4]
+k11.png OK found 9 of 9 | strands 1 | closed True |  | 2s
+   curve pieces kept: 1 dropped: 1
+   curve pixels: 19826 -> skeleton pixels: 2393
+   spurs cut: 0
+   piece 1: endpoint pixels 0 | junction pixels 53
+   piece 2: junctions after merge 10
+   piece 3: roads (segments) 20
+   junctions: 10 endpoints: 0 edges: 20 pieces: 1
+   degrees: [4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+k12.png OK found 9 of 9 | strands 3 | closed True |  | 3s
+   curve pieces kept: 1 dropped: 1
+   curve pixels: 16814 -> skeleton pixels: 2361
+   spurs cut: 0
+   piece 1: endpoint pixels 0 | junction pixels 42
+   piece 2: junctions after merge 8
+   piece 3: roads (segments) 16
+   junctions: 8 endpoints: 0 edges: 16 pieces: 1
+   degrees: [4, 4, 4, 4, 4, 4, 4, 4]
+k13.png OK found 9 of 9 | strands 1 | closed True |  | 3s
+   curve pieces kept: 1 dropped: 0
+   curve pixels: 18521 -> skeleton pixels: 2369
+   spurs cut: 0
+   piece 1: endpoint pixels 0 | junction pixels 61
+   piece 2: junctions after merge 12
+   piece 3: roads (segments) 24
+   junctions: 12 endpoints: 0 edges: 24 pieces: 1
+   degrees: [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+k14.png OK found 9 of 9 | strands 3 | closed True |  | 3s
+   curve pieces kept: 1 dropped: 1
+   curve pixels: 18320 -> skeleton pixels: 2386
+   spurs cut: 0
+   piece 1: endpoint pixels 0 | junction pixels 51
+   piece 2: junctions after merge 10
+   piece 3: roads (segments) 20
+   junctions: 10 endpoints: 0 edges: 20 pieces: 1
+   degrees: [4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+k15.png OK found 9 of 9 | strands 3 | closed True |  | 2s
+   curve pieces kept: 1 dropped: 1
+   curve pixels: 18902 -> skeleton pixels: 2689
+   spurs cut: 0
+   piece 1: endpoint pixels 0 | junction pixels 61
+   piece 2: junctions after merge 12
+   piece 3: roads (segments) 24
+   junctions: 12 endpoints: 0 edges: 24 pieces: 1
+   degrees: [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+k16.png OK found 12 of 12 | strands 2 | closed True |  | 2s
+   curve pieces kept: 1 dropped: 0
+   curve pixels: 18472 -> skeleton pixels: 2646
+   spurs cut: 0
+   piece 1: endpoint pixels 0 | junction pixels 80
+   piece 2: junctions after merge 16
+   piece 3: roads (segments) 32
+   junctions: 16 endpoints: 0 edges: 32 pieces: 1
+   degrees: [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+k17.png OK found 12 of 12 | strands 4 | closed True |  | 3s
+   curve pieces kept: 1 dropped: 0
+   curve pixels: 20300 -> skeleton pixels: 3462
+   spurs cut: 0
+   piece 1: endpoint pixels 0 | junction pixels 81
+   piece 2: junctions after merge 16
+   piece 3: roads (segments) 32
+   junctions: 16 endpoints: 0 edges: 32 pieces: 1
+   degrees: [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+k18.png OK found 12 of 12 | strands 2 | closed True |  | 3s
+   curve pieces kept: 14 dropped: 0
+   curve pixels: 16951 -> skeleton pixels: 2453
+   curve pieces kept: 14 dropped: 0
+   curve pixels: 16951 -> skeleton pixels: 2453
+k19.png STOPPED found 0 of 12 | strands  | closed  | I could not find any dots in this picture. | 0s
+   curve pieces kept: 4 dropped: 0
+   curve pixels: 17252 -> skeleton pixels: 2642
+   spurs cut: 0
+   piece 1: endpoint pixels 0 | junction pixels 43
+   piece 2: junctions after merge 8
+   piece 3: roads (segments) 16
+   junctions: 8 endpoints: 0 edges: 16 pieces: 4
+   degrees: [4, 4, 4, 4, 4, 4, 4, 4]
+k20.png OK found 12 of 12 | strands 4 | closed True |  | 3s
+   curve pieces kept: 1 dropped: 0
+   curve pixels: 18583 -> skeleton pixels: 2537
+   spurs cut: 0
+   piece 1: endpoint pixels 0 | junction pixels 85
+   piece 2: junctions after merge 16
+   piece 3: roads (segments) 32
+   junctions: 16 endpoints: 0 edges: 32 pieces: 1
+   degrees: [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+k21.png OK found 13 of 13 | strands 3 | closed True |  | 2s
+   curve pieces kept: 1 dropped: 0
+   curve pixels: 19200 -> skeleton pixels: 2693
+   spurs cut: 4
+   piece 1: endpoint pixels 0 | junction pixels 77
+   piece 2: junctions after merge 18
+   piece 3: roads (segments) 32
+   junctions: 18 endpoints: 0 edges: 32 pieces: 1
+   degrees: [2, 2, 2, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+k22.png OK found 13 of 13 | strands 3 | closed True |  | 3s
+   curve pieces kept: 1 dropped: 0
+   curve pixels: 18590 -> skeleton pixels: 2527
+   spurs cut: 0
+   piece 1: endpoint pixels 0 | junction pixels 69
+   piece 2: junctions after merge 12
+   piece 3: roads (segments) 24
+   junctions: 12 endpoints: 0 edges: 24 pieces: 1
+   degrees: [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+k23.png OK found 13 of 13 | strands 1 | closed True |  | 2s
+   curve pieces kept: 1 dropped: 0
+   curve pixels: 18794 -> skeleton pixels: 2459
+   spurs cut: 2
+   piece 1: endpoint pixels 0 | junction pixels 72
+   piece 2: junctions after merge 15
+   piece 3: roads (segments) 28
+   junctions: 15 endpoints: 0 edges: 28 pieces: 1
+   degrees: [2, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+k24.png OK found 13 of 13 | strands 2 | closed True |  | 3s
+   curve pieces kept: 1 dropped: 0
+   curve pixels: 21506 -> skeleton pixels: 2844
+   spurs cut: 0
+   piece 1: endpoint pixels 0 | junction pixels 123
+   piece 2: junctions after merge 20
+   piece 3: roads (segments) 40
+   junctions: 20 endpoints: 0 edges: 40 pieces: 1
+   degrees: [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+k25.png OK found 13 of 13 | strands 1 | closed True |  | 3s
+
+=== SUMMARY (after_fix4) ===
+Pictures: 25
+Dot count correct: 24 of 25 = 96%
+Whole pipeline OK: 23 of 25 = 92%
+3x3 (k01-k15) : dots correct 15 of 15 | pipeline OK 14
+2-4-4-2 (k16-k20) : dots correct 4 of 5 | pipeline OK 4
+1-3-5-3-1 (k21-k25) : dots correct 5 of 5 | pipeline OK 5
+Saved: results\run_all_after_fix4.csv and results\run_all_after_fix4_log.txt

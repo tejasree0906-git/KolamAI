@@ -7,6 +7,8 @@ except ImportError:
     raise SystemExit("networkx is missing. Run this in your terminal: pip install networkx")
 
 MERGE = 9   # junction pixels closer than about this many pixels become ONE junction
+SPUR = 15   # NEW 74: a dead-end tail this short (in pixels) is a fake tail and gets cut
+SPECK = 50  # NEW 112: a separate skeleton piece smaller than this (in pixels) is a stray speck and gets erased
 
 # find the results folder: look in the current folder, then next to this file, then one level up
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -19,6 +21,53 @@ else:
     os.makedirs(RES, exist_ok=True)                         # NEW 73
 
 
+def prune_spurs(skel, max_len=SPUR):                        # NEW 75: cuts short fake tails
+    s = skel.astype(np.uint8)                               # NEW 76
+    nb = cv2.filter2D(s, -1, np.ones((3, 3), np.float32), borderType=cv2.BORDER_CONSTANT) - s   # NEW 77: neighbour count
+    out = skel.copy()                                       # NEW 78: the cleaned copy
+    H, W = skel.shape                                       # NEW 79
+    removed = 0                                             # NEW 80
+    ys, xs = np.nonzero(skel & (nb == 1))                   # NEW 81: every loose end
+    for y, x in zip(ys, xs):                                # NEW 82
+        path = [(y, x)]                                     # NEW 83: pixels of this tail
+        seen = {(y, x)}                                     # NEW 84
+        cur = (y, x)                                        # NEW 85
+        hit = False                                         # NEW 86: did we reach a crossing?
+        while len(path) <= max_len:                         # NEW 87: stop if the tail is too long
+            nxt = []                                        # NEW 88
+            for dy in (-1, 0, 1):                           # NEW 89
+                for dx in (-1, 0, 1):                       # NEW 90
+                    if dy == 0 and dx == 0:                 # NEW 91
+                        continue                            # NEW 92
+                    py, px = cur[0] + dy, cur[1] + dx       # NEW 93
+                    if 0 <= py < H and 0 <= px < W and skel[py, px] and (py, px) not in seen:   # NEW 94
+                        nxt.append((py, px))                # NEW 95
+            if not nxt:                                     # NEW 96: a lone piece, leave it
+                break                                       # NEW 97
+            cur = nxt[0]                                    # NEW 98: take one step
+            seen.add(cur)                                   # NEW 99
+            if nb[cur] >= 3:                                # NEW 100: reached a crossing
+                hit = True                                  # NEW 101
+                break                                       # NEW 102
+            path.append(cur)                                # NEW 103
+        if hit:                                             # NEW 104: short tail ending at a crossing
+            for p in path:                                  # NEW 105
+                out[p] = False                              # NEW 106: erase the tail
+            removed += 1                                    # NEW 107
+    return out, removed                                     # NEW 108
+
+
+def drop_specks(skel, min_px=SPECK):                        # NEW 113: erases tiny separate pieces
+    n, lab, st, _ = cv2.connectedComponentsWithStats(skel.astype(np.uint8), connectivity=8)   # NEW 114: label every piece
+    out = skel.copy()                                       # NEW 115
+    dropped = 0                                             # NEW 116
+    for i in range(1, n):                                   # NEW 117
+        if st[i, cv2.CC_STAT_AREA] < min_px:                # NEW 118: piece is tiny
+            out[lab == i] = False                           # NEW 119: erase it
+            dropped += 1                                    # NEW 120
+    return out, dropped                                     # NEW 121
+
+
 def build_graph(name):
     path = os.path.join(RES, "skel_" + name)
     img = cv2.imread(path, 0)
@@ -26,6 +75,11 @@ def build_graph(name):
         print("   cannot open", path, "- run detect_dots.py first")
         return None
     skel = img > 0                                             # True where the 1-pixel line is
+    skel, cut = prune_spurs(skel)                              # NEW 109: cut fake tails first
+    print("   spurs cut:", cut)                                # NEW 110
+    skel, gone = drop_specks(skel)                             # NEW 122: then erase stray specks
+    print("   specks dropped:", gone)                          # NEW 123
+    cv2.imwrite(os.path.join(RES, "pruned_" + name), (skel * 255).astype(np.uint8))   # NEW 111: look at this picture
     s = skel.astype(np.uint8)
 
     # STEP 1: count the neighbours of every pixel (3x3 box sum, minus the pixel itself)
