@@ -2,6 +2,8 @@ import cv2, os, json                              # NEW 26: json writes the dots
 import numpy as np                                 # NEW 2: for an empty black picture
 from skimage.morphology import skeletonize         # NEW 3: thins a line to 1 pixel
 
+MIN_DOT = 100                                      # NEW 124: smallest dot area (k19 dots are 106 to 112)
+
 def detect_dots(path):
     img = cv2.imread(path)
     if img is None:                                        # NEW 71: not a picture, or cannot be opened
@@ -11,23 +13,42 @@ def detect_dots(path):
     _, bw = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
     n, labels, stats, centroids = cv2.connectedComponentsWithStats(bw, connectivity=8)
 
-    count = 0
-    dot_ids = []
-    dots = []                                              # NEW 27: centre and size of every dot
+    # NEW 125: step 1, collect every shape that passes the three dot tests
+    cands = []                                             # NEW 126
     for i in range(1, n):
         x, y, w, h, area = stats[i]
         roundness = area / (3.14159 * (max(w, h) / 2) ** 2)
-        if 120 < area < 4000 and 0.6 < w / h < 1.5 and roundness > 0.5:
+        if MIN_DOT < area < 4000 and 0.6 < w / h < 1.5 and roundness > 0.5:   # NEW 127: min is now MIN_DOT
             cx, cy = centroids[i]
-            r = int(max(w, h) / 2) + 8
-            cv2.circle(img, (int(cx), int(cy)), r, (0, 0, 255), 3)
-            count += 1
-            dot_ids.append(i)
-            dots.append([int(round(cx)), int(round(cy)), r])        # NEW 28: remember this dot
+            cands.append((int(area), i, int(w), int(h), float(cx), float(cy)))   # NEW 128
+    cands.sort(reverse=True)                               # NEW 129: biggest first
 
-    # PIECE 1: remove the dots, keep only the curve
+    # NEW 130: step 2, a small shape inside a bigger dot is a duplicate, not a new dot
+    count = 0
+    dot_ids = []
+    dup_ids = []                                           # NEW 131: duplicates, erased but not counted
+    dots = []                                              # NEW 27: centre and size of every dot
+    for area, i, w, h, cx, cy in cands:                    # NEW 132
+        inside = False                                     # NEW 133
+        for a2, i2, w2, h2, cx2, cy2 in cands:             # NEW 134
+            if a2 > area:                                  # NEW 135: only compare with bigger ones
+                dist = ((cx - cx2) ** 2 + (cy - cy2) ** 2) ** 0.5   # NEW 136
+                if dist < max(w2, h2) / 2:                 # NEW 137: centre is inside the bigger dot
+                    inside = True                          # NEW 138
+                    break                                  # NEW 139
+        if inside:                                         # NEW 140
+            dup_ids.append(i)                              # NEW 141
+            continue                                       # NEW 142
+        r = int(max(w, h) / 2) + 8
+        cv2.circle(img, (int(cx), int(cy)), r, (0, 0, 255), 3)
+        count += 1
+        dot_ids.append(i)
+        dots.append([int(round(cx)), int(round(cy)), r])        # NEW 28: remember this dot
+    print("   dots:", count, "duplicates ignored:", len(dup_ids))   # NEW 143
+
+    # PIECE 1: remove the dots (and their duplicates), keep only the curve
     curve = bw.copy()
-    for i in dot_ids:
+    for i in dot_ids + dup_ids:                            # NEW 144: erase duplicates too
         curve[labels == i] = 0
 
     # NEW 2: keep only real curve pieces
