@@ -9,6 +9,7 @@ from matplotlib.animation import FuncAnimation, PillowWriter   # NEW 32: FuncAni
 from matplotlib.patches import Circle                       # NEW 33: round shapes for dots and start marker
 
 RES = "results"                                             # NEW 34: same folder as the other scripts
+DOT_R = 9                                                   # NEW 145: EVERY dot is drawn with this radius (pixels, picture is 500 wide), so all pictures look the same
 
 
 def load_path_data(name):                                   # NEW 35
@@ -28,7 +29,7 @@ def pick_label_spot(sx, sy, tw, th, all_pts, dots, w, h, others, enough=10):   #
         for (x, y, r) in dots:                              # NEW 53: dots count too (real size is r - 8)
             ddx = max(x0 - x, 0, x - x1)                    # NEW 53
             ddy = max(y0 - y, 0, y - y1)                    # NEW 53
-            gap = min(gap, float(np.hypot(ddx, ddy)) - (r - 8))   # NEW 53
+            gap = min(gap, float(np.hypot(ddx, ddy)) - DOT_R)   # NEW 146: all dots have the same size now
         for (ox0, oy0, ox1, oy1) in others:                 # NEW 62: other rings and labels count too
             gx = max(x0 - ox1, ox0 - x1, 0)                 # NEW 62: gap left to right (0 if they overlap sideways)
             gy = max(y0 - oy1, oy0 - y1, 0)                 # NEW 62: gap top to bottom
@@ -71,7 +72,7 @@ def pick_label_spot(sx, sy, tw, th, all_pts, dots, w, h, others, enough=10):   #
     return best                                             # NEW 54
 
 
-def make_animation(data, speed=20, hold=15, verbose=False):   # NEW 36, NEW 55: verbose=True prints the label gaps
+def make_animation(data, speed=5, hold=15, verbose=False):   # NEW 147: default speed 5 (was 20), much slower   # NEW 36, NEW 55: verbose=True prints the label gaps
     """speed = points drawn per frame (bigger = faster). hold = frames to pause at the start and the end."""
     w, h = data["width"], data["height"]                    # NEW 36: picture size
     strands = [np.array(s) for s in data["strands"]]        # NEW 36: each strand = array of (x, y) points
@@ -89,7 +90,7 @@ def make_animation(data, speed=20, hold=15, verbose=False):   # NEW 36, NEW 55: 
     placed = []                                             # NEW 67: label boxes placed so far
 
     for x, y, r in data["dots"]:                            # NEW 38: dots are ALWAYS there, from frame 1
-        ax.add_patch(Circle((x, y), r - 8, color="black"))  # NEW 38: r - 8 = the real dot size (r had +8 for the red ring)
+        ax.add_patch(Circle((x, y), DOT_R, color="black"))  # NEW 148: one fixed size for every dot (was r - 8)
 
     lines = [ax.plot([], [], color="royalblue", lw=2.5, solid_capstyle="round")[0] for _ in strands]   # NEW 39: one empty line per strand
     starts = []                                             # NEW 40
@@ -129,7 +130,7 @@ if __name__ == "__main__":                                  # NEW 44: python src
     names = sys.argv[1:] or ["k01", "k02", "k03", "k04"]    # NEW 44
     for name in names:                                      # NEW 44
         data = load_path_data(name)                         # NEW 44
-        fig, anim, n_frames = make_animation(data, speed=15, verbose=True)   # NEW 44, NEW 55
+        fig, anim, n_frames = make_animation(data, speed=5, verbose=True)   # NEW 44, NEW 55
         out = os.path.join(RES, "anim_" + name + ".gif")    # NEW 44
         anim.save(out, writer=PillowWriter(fps=25))         # NEW 44: write the GIF
         plt.close(fig)                                      # NEW 44

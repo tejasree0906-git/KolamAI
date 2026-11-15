@@ -13,7 +13,7 @@ from trace_path import order_all_roads, build_strands, save_path_data   # NEW 76
 from animate_path import load_path_data, make_animation      # NEW 76
 
 
-def run_pipeline(path, speed=15):                            # NEW 77
+def run_pipeline(path, speed=5):   # NEW 149: default speed 5 (was 15), slower animation                            # NEW 77
     """One picture in, results out. Raises ValueError with a friendly sentence when something is wrong.
     Returns a dictionary: dots picture, skeleton picture, GIF, and the counts."""
     name = os.path.basename(path)                            # NEW 77: for example "upload.png"

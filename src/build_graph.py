@@ -9,6 +9,7 @@ except ImportError:
 MERGE = 9   # junction pixels closer than about this many pixels become ONE junction
 SPUR = 15   # NEW 74: a dead-end tail this short (in pixels) is a fake tail and gets cut
 SPECK = 50  # NEW 112: a separate skeleton piece smaller than this (in pixels) is a stray speck and gets erased
+SHORT_ROAD = 5   # NEW 152: two junctions joined by a road this short (in pixels) are really ONE crossing
 
 # find the results folder: look in the current folder, then next to this file, then one level up
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -19,7 +20,6 @@ for base in (os.getcwd(), HERE, os.path.dirname(HERE)):
 else:
     RES = os.path.join(os.getcwd(), "results")              # NEW 73: no folder yet (for example on the server), make one
     os.makedirs(RES, exist_ok=True)                         # NEW 73
-
 
 def prune_spurs(skel, max_len=SPUR):                        # NEW 75: cuts short fake tails
     s = skel.astype(np.uint8)                               # NEW 76
@@ -66,6 +66,34 @@ def drop_specks(skel, min_px=SPECK):                        # NEW 113: erases ti
             out[lab == i] = False                           # NEW 119: erase it
             dropped += 1                                    # NEW 120
     return out, dropped                                     # NEW 121
+
+
+def glue_close_junctions(G, slab, max_px=SHORT_ROAD):       # NEW 153: ONE crossing that the pixels split in two becomes ONE junction
+    tiny = [(u, v, d["seg"]) for u, v, d in G.edges(data=True)   # NEW 154: roads between two junctions that are very short
+            if u != v and u.startswith("J") and v.startswith("J") and int((slab == d["seg"]).sum()) <= max_px]
+    if not tiny:                                            # NEW 155
+        return G, 0                                         # NEW 155
+    parent = {n: n for n in G.nodes}                        # NEW 156: who is glued to whom
+    def root(n):                                            # NEW 156
+        while parent[n] != n:                               # NEW 156
+            n = parent[n]                                   # NEW 156
+        return n                                            # NEW 156
+    for u, v, seg in tiny:                                  # NEW 157
+        parent[root(v)] = root(u)                           # NEW 157
+    groups = {}                                             # NEW 158
+    for n in G.nodes:                                       # NEW 158
+        groups.setdefault(root(n), []).append(n)            # NEW 158
+    H = nx.MultiGraph()                                     # NEW 159: the new graph
+    for r, members in groups.items():                       # NEW 159
+        xs = [G.nodes[m]["pos"][0] for m in members]        # NEW 159
+        ys = [G.nodes[m]["pos"][1] for m in members]        # NEW 159
+        H.add_node(r, pos=(sum(xs) / len(xs), sum(ys) / len(ys)))   # NEW 159: centre = middle of the glued junctions
+    gone = {seg for _, _, seg in tiny}                      # NEW 160: the tiny roads disappear
+    for u, v, d in G.edges(data=True):                      # NEW 160
+        if d["seg"] in gone:                                # NEW 160
+            continue                                        # NEW 160
+        H.add_edge(root(u), root(v), seg=d["seg"])          # NEW 160: a road that left one half and came back to the other becomes a loop
+    return H, len(tiny)                                     # NEW 161
 
 
 def build_graph(name):
@@ -123,6 +151,9 @@ def build_graph(name):
         else:
             print("   segment", k, "has", len(ends), "ends, skipped")
 
+    G, glued = glue_close_junctions(G, slab)                   # NEW 162: glue crossings that were split in two
+    print("   junctions merged:", glued)                       # NEW 163
+
     # picture to check with your own eyes: green = junction, blue = endpoint
     out = cv2.cvtColor(cv2.dilate(s, np.ones((3, 3), np.uint8)) * 255, cv2.COLOR_GRAY2BGR)
     for node, d in G.nodes(data=True):
@@ -131,7 +162,8 @@ def build_graph(name):
     cv2.imwrite(os.path.join(RES, "graph_" + name), out)
 
     n_end = sum(1 for n in G if n.startswith("E"))
-    print("   junctions:", nj - 1, "endpoints:", n_end, "edges:", G.number_of_edges(),
+    n_j = sum(1 for n in G if n.startswith("J"))               # NEW 164: junctions after gluing
+    print("   junctions:", n_j, "endpoints:", n_end, "edges:", G.number_of_edges(),
           "pieces:", nx.number_connected_components(G))
     print("   degrees:", sorted(dict(G.degree()).values()))
     return G, slab, jlab                                       # NEW 1: also give back the road labels and junction labels

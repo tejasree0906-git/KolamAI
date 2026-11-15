@@ -19,7 +19,8 @@ st.title("Kolam AI")                                         # NEW 8
 st.write("Upload a clean, top-down dot kolam. I will show you how to draw it.")   # NEW 8
 
 file = st.file_uploader("Pick a picture", type=["png", "jpg", "jpeg"])   # NEW 9
-speed = st.slider("Speed (higher = faster)", 5, 40, 15)      # NEW 10
+speed = st.slider("Speed (higher = faster)", 2, 20, 5)       # NEW 150: slower range, default 5 (was 5 to 40, default 15)
+st.caption("Slower speed = longer animation and a slightly longer wait.")   # NEW 151
 
 if file is not None:                                         # NEW 11
     data = np.frombuffer(file.read(), np.uint8)              # NEW 12
