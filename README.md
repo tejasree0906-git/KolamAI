@@ -103,7 +103,7 @@ Where every crossing has an even number of lines, a connected piece can be trace
 
 Evaluated on a **test set of 25 clean, top-down dot kolams** (k01 to k25). **Nothing is trained.** The correct dot count of every picture was written by hand **before** running the program (`data/labels.csv`). All 25 were marked `clean` by eye.
 
-k05 to k25 were hand-drawn on paper and digitized with ChatGPT.
+All 25 pictures (k01 to k25) were hand-drawn on paper and digitized with ChatGPT.
 
 Every run: 25 pictures, resized to 500 px wide, speed 40.
 
@@ -190,7 +190,7 @@ KolamAI/
 - A real tail shorter than 15 px would be cut. A real dot smaller than 100 px would be missed.
 - The locks check the result, not the blur itself. A blurry picture that still gives clean even crossings would pass.
 - 100% means every strand closes. It does not prove the path looks right: k10 passed both locks and was still wrong until the eye caught it. Only 11 of 25 pictures were checked by eye.
-- The 21 newest pictures are hand-drawn and redrawn by ChatGPT, not photos.
+- All 25 pictures are hand-drawn on paper and redrawn digitally by ChatGPT. None is a street photo.
 - Every upload is saved under one file name, so two people at the same time could overwrite each other. Fine for a demo.
 
 <br>
