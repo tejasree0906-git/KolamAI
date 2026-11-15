@@ -17,7 +17,7 @@ def detect_dots(path):
     for i in range(1, n):
         x, y, w, h, area = stats[i]
         roundness = area / (3.14159 * (max(w, h) / 2) ** 2)
-        if 100 < area < 4000 and 0.6 < w / h < 1.5 and roundness > 0.5:
+        if 120 < area < 4000 and 0.6 < w / h < 1.5 and roundness > 0.5:
             cx, cy = centroids[i]
             r = int(max(w, h) / 2) + 8
             cv2.circle(img, (int(cx), int(cy)), r, (0, 0, 255), 3)
